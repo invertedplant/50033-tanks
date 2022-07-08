@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.Reflection;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -9,12 +10,13 @@ public class StateController : MonoBehaviour {
 	public EnemyStats enemyStats;
 	public Transform eyes;
 	public State remainState;
+	public SpriteRenderer alertSprite;
 
 	[HideInInspector] public NavMeshAgent navMeshAgent;
 	[HideInInspector] public TankShooting tankShooting;
 	[HideInInspector] public List<Transform> wayPointList;
 	[HideInInspector] public int nextWayPoint;
-	[HideInInspector] public Transform chaseTarget;
+	public Transform chaseTarget;
 	[HideInInspector] public float stateTimeElapsed;
 
 	private bool aiActive;
@@ -24,6 +26,9 @@ public class StateController : MonoBehaviour {
 	{
 		tankShooting = GetComponent<TankShooting> ();
 		navMeshAgent = GetComponent<NavMeshAgent> ();
+		alertSprite = GetComponentInChildren<SpriteRenderer>();
+		alertSprite.enabled = false;
+
 	}
 
 	public void SetupAI(bool aiActivationFromTankManager, List<Transform> wayPointsFromTankManager)
@@ -55,7 +60,15 @@ public class StateController : MonoBehaviour {
 	void Update()
 	{
 		if (!aiActive) return;
-
+		if (chaseTarget != null)
+		{
+			alertSprite.enabled = true;
+			//StartCoroutine(resetChaseTarget());
+		}
+		else
+		{
+			alertSprite.enabled = false;
+		}
 		currentState.UpdateState(this);
 	}
 

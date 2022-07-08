@@ -9,10 +9,11 @@ public class ChaseAction : Action
 		Chase(controller);
     }
 
-	private void Chase(StateController controller)
+	private bool Chase(StateController controller)
 	{
 		controller.navMeshAgent.destination = controller.chaseTarget.position;
 		controller.navMeshAgent.isStopped = false;
+		return controller.CheckIfCountDownElapsed(controller.enemyStats.chaseTime);
 	}
 
 }

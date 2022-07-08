@@ -1,5 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Audio;
 
 public class TankShooting : MonoBehaviour
 {
@@ -8,11 +9,16 @@ public class TankShooting : MonoBehaviour
     public Transform m_FireTransform;
     public Slider m_AimSlider;
     public AudioSource m_ShootingAudio;
+    public AudioMixerGroup c_AudioMixerGroup;
+    public AudioMixerGroup s_AudioMixerGroup;
     public AudioClip m_ChargingClip;
     public AudioClip m_FireClip;
-    public float m_MinLaunchForce = 15f;
+    // original value: 15f
+    public float m_MinLaunchForce = 7.5f;
+    // original value: 30f
     public float m_MaxLaunchForce = 30f;
-    public float m_MaxChargeTime = 0.75f;
+    // original value: 0.75f
+    public float m_MaxChargeTime = 1.25f;
 
     private string m_FireButton;
     private float m_CurrentLaunchForce;
@@ -41,7 +47,7 @@ public class TankShooting : MonoBehaviour
         if (m_CurrentLaunchForce >= m_MaxLaunchForce && !m_Fired)
         {
             m_CurrentLaunchForce = m_MaxLaunchForce;
-            Fire(m_CurrentLaunchForce, 1);
+            Fire(m_CurrentLaunchForce, 0.75f);
         }
         else if (Input.GetButtonDown(m_FireButton))
         {
@@ -49,6 +55,7 @@ public class TankShooting : MonoBehaviour
             m_CurrentLaunchForce = m_MinLaunchForce;
 
             m_ShootingAudio.clip = m_ChargingClip;
+            m_ShootingAudio.outputAudioMixerGroup = c_AudioMixerGroup;
             m_ShootingAudio.Play();
         }
         else if (Input.GetButton(m_FireButton) && !m_Fired)
@@ -58,7 +65,7 @@ public class TankShooting : MonoBehaviour
         }
         else if (Input.GetButtonUp(m_FireButton) && !m_Fired)
         {
-            Fire(m_CurrentLaunchForce, 1);
+            Fire(m_CurrentLaunchForce, 0.75f);
         }
     }
 
@@ -75,6 +82,7 @@ public class TankShooting : MonoBehaviour
         shellInstance.velocity = m_CurrentLaunchForce * m_FireTransform.forward;
 
         m_ShootingAudio.clip = m_FireClip;
+        m_ShootingAudio.outputAudioMixerGroup = s_AudioMixerGroup;
         m_ShootingAudio.Play();
 
         m_CurrentLaunchForce = m_MinLaunchForce;

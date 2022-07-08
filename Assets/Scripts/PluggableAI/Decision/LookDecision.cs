@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 [CreateAssetMenu(menuName = "PluggableAI/Decisions/Look")]
 public class LookDecision : Decision
@@ -23,12 +24,19 @@ public class LookDecision : Decision
         if (Physics.SphereCast(position, radius, direction, out hit, lookRange) && hit.collider.CompareTag("Player"))
         {
 			controller.chaseTarget = hit.transform;
+            //stopChase(controller);
+
 			return true;
         }
 		else
 		{
 			return false;
 		}
+    }
+
+    private IEnumerator stopChase(StateController controller){
+        yield return new WaitForSeconds(5.0f);
+        controller.chaseTarget = null;
     }
 
 }

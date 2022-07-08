@@ -8,31 +8,45 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public int m_NumRoundsToWin = 5;            
-    public float m_StartDelay = 3f;             
-    public float m_EndDelay = 3f;               
-    public CameraControl m_CameraControl;       
-    public Text m_MessageText;                  
+    public int m_NumRoundsToWin = 5;
+    public float m_StartDelay = 3f;
+    public float m_EndDelay = 3f;
+    public int currentTanks = 0;
+    public CameraControl m_CameraControl;
+    public Text m_MessageText;
     public GameObject[] m_TankPrefabs;
-    public TankManager[] m_Tanks;               
+    public TankManager[] m_Tanks;
     public List<Transform> wayPointsForAI;
-
-    private int m_RoundNumber;                  
-    private WaitForSeconds m_StartWait;         
-    private WaitForSeconds m_EndWait;           
-    private TankManager m_RoundWinner;          
-    private TankManager m_GameWinner;           
+    public AudioSource[] sounds;
+    public AudioSource m_VictorySource;
+    // private AudioClip m_VictoryClip;
+    private int m_RoundNumber;
+    private WaitForSeconds m_StartWait;
+    private WaitForSeconds m_EndWait;
+    private TankManager m_RoundWinner;
+    private TankManager m_GameWinner;
 
 
     private void Start()
     {
         m_StartWait = new WaitForSeconds(m_StartDelay);
         m_EndWait = new WaitForSeconds(m_EndDelay);
+        sounds = GetComponents<AudioSource>();
+        m_VictorySource = sounds[1];
 
         SpawnAllTanks();
         SetCameraTargets();
 
         StartCoroutine(GameLoop());
+    }
+
+    private void Update()
+    {
+        int n = GetNumTanksLeft();
+        if (n < currentTanks){
+            currentTanks = n;
+            m_CameraControl.ShakeCamera();
+        }
     }
 
 
@@ -49,6 +63,7 @@ public class GameManager : MonoBehaviour
                 Instantiate(m_TankPrefabs[i], m_Tanks[i].m_SpawnPoint.position, m_Tanks[i].m_SpawnPoint.rotation) as GameObject;
             m_Tanks[i].m_PlayerNumber = i + 1;
             m_Tanks[i].SetupAI(wayPointsForAI);
+            currentTanks = i + 1;
         }
     }
 
@@ -58,7 +73,9 @@ public class GameManager : MonoBehaviour
         Transform[] targets = new Transform[m_Tanks.Length];
 
         for (int i = 0; i < targets.Length; i++)
+        {
             targets[i] = m_Tanks[i].m_Instance.transform;
+        }
 
         m_CameraControl.m_Targets = targets;
     }
@@ -112,8 +129,11 @@ public class GameManager : MonoBehaviour
 
         string message = EndMessage();
         m_MessageText.text = message;
-
-        yield return m_EndWait;
+        m_VictorySource.PlayOneShot(m_VictorySource.clip);
+        while (m_VictorySource.isPlaying)
+        {
+            yield return null;
+        }
     }
 
 
@@ -127,6 +147,16 @@ public class GameManager : MonoBehaviour
         }
 
         return numTanksLeft <= 1;
+    }
+
+    private int GetNumTanksLeft()
+    {
+        int numTanksLeft = 0;
+        for (int i = 0; i < m_Tanks.Length; i++)
+        {
+            if (m_Tanks[i].m_Instance.activeSelf) numTanksLeft++;
+        }
+        return numTanksLeft;
     }
 
     private TankManager GetRoundWinner()

@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
+using UnityEngine.Audio;
 
 public class ShellExplosion : MonoBehaviour
 {
 
     public LayerMask m_TankMask;
     public ParticleSystem m_ExplosionParticles;       
-    public AudioSource m_ExplosionAudio;              
+    public AudioSource m_ExplosionAudio;
+    public AudioMixerGroup s_AudioMixerGroup;              
     public float m_MaxDamage = 100f;                  
     public float m_ExplosionForce = 1000f;            
     public float m_MaxLifeTime = 2f;                  
@@ -39,6 +41,7 @@ public class ShellExplosion : MonoBehaviour
 
         m_ExplosionParticles.transform.parent = null;
         m_ExplosionParticles.Play();
+        m_ExplosionAudio.outputAudioMixerGroup = s_AudioMixerGroup;
         m_ExplosionAudio.Play();
         Destroy(m_ExplosionParticles.gameObject, m_ExplosionParticles.main.duration);
         Destroy(gameObject);

@@ -1,29 +1,39 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public class CameraControl : MonoBehaviour
 {
-    public float m_DampTime = 0.2f;                 
-    public float m_ScreenEdgeBuffer = 4f;           
-    public float m_MinSize = 6.5f;                  
-    [HideInInspector] public Transform[] m_Targets; 
-
-
-    private Camera m_Camera;                        
-    private float m_ZoomSpeed;                      
-    private Vector3 m_MoveVelocity;                 
-    private Vector3 m_DesiredPosition;              
+    public float m_DampTime = 0.2f;
+    public float m_ScreenEdgeBuffer = 4f;
+    public float m_MinSize = 6.5f;
+    [HideInInspector] public Transform[] m_Targets;
+    private bool shaking = false;
+    private Camera m_Camera;
+    private Transform camTransform;
+    private Vector3 currentPos;
+    public float shakeAmount = 0.3f;
+    public float shakeDuration = 0.5f;
+	public float decreaseFactor = 1f;
+    private float m_ZoomSpeed;
+    private Vector3 m_MoveVelocity;
+    private Vector3 m_DesiredPosition;
 
 
     private void Awake()
     {
         m_Camera = GetComponentInChildren<Camera>();
+        if (camTransform == null)
+        {
+            camTransform = GetComponent(typeof(Transform)) as Transform;
+        }
     }
 
 
     private void FixedUpdate()
     {
-        Move();
-        Zoom();
+        if (!shaking)
+            Move();
+            Zoom();
     }
 
 
@@ -80,11 +90,11 @@ public class CameraControl : MonoBehaviour
 
             Vector3 desiredPosToTarget = targetLocalPos - desiredLocalPos;
 
-            size = Mathf.Max (size, Mathf.Abs (desiredPosToTarget.y));
+            size = Mathf.Max(size, Mathf.Abs(desiredPosToTarget.y));
 
-            size = Mathf.Max (size, Mathf.Abs (desiredPosToTarget.x) / m_Camera.aspect);
+            size = Mathf.Max(size, Mathf.Abs(desiredPosToTarget.x) / m_Camera.aspect);
         }
-        
+
         size += m_ScreenEdgeBuffer;
 
         size = Mathf.Max(size, m_MinSize);
@@ -100,5 +110,28 @@ public class CameraControl : MonoBehaviour
         transform.position = m_DesiredPosition;
 
         m_Camera.orthographicSize = FindRequiredSize();
+    }
+
+    public void ShakeCamera()
+    {
+        StartCoroutine(Shake(shakeDuration));
+    }
+
+    IEnumerator Shake(float duration)
+    {
+        Vector3 originalPos = transform.position;
+        shaking = true;
+		while (duration > 0)
+		{
+			transform.position = transform.position + Random.insideUnitSphere * shakeAmount;
+			duration -= Time.deltaTime * decreaseFactor;
+            yield return null;
+        }
+        if (duration <= 0) 
+        {
+            shaking = false;
+            transform.position = originalPos;
+        }
+        
     }
 }

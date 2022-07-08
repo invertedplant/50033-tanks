@@ -9,7 +9,6 @@ public class TankHealth : MonoBehaviour
     public Color m_FullHealthColor = Color.green;  
     public Color m_ZeroHealthColor = Color.red;    
     public GameObject m_ExplosionPrefab;
-    
     private AudioSource m_ExplosionAudio;          
     private ParticleSystem m_ExplosionParticles;   
     private float m_CurrentHealth;  
@@ -59,7 +58,7 @@ public class TankHealth : MonoBehaviour
         m_ExplosionParticles.transform.position = transform.position;
         m_ExplosionParticles.gameObject.SetActive(true);
         m_ExplosionParticles.Play();
-        m_ExplosionAudio.Play();
+        m_ExplosionAudio.Play();;
 
         gameObject.SetActive(false);
     }
